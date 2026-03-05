@@ -318,73 +318,6 @@ python check_sudoku_model.py --model outputs/sudoku_final.pt
 - **[product_backlog.md](docs/product_backlog.md)**: Feature tracking and sprint planning
 - **[daily_scrum.md](docs/daily_scrum.md)**: Development progress log
 
-## 🎯 Use Cases
-
-### Educational
-- 📚 Demonstrate recursive reasoning in AI
-- 🎓 Teaching transformer architectures
-- 🧠 Explaining "System 2 thinking" in ML
-- 🔬 Research presentations
-
-### Research
-- 🏗️ Parameter-efficient model architectures
-- 🔄 Recursive computation in transformers
-- 📊 Deep supervision training techniques
-- 🎯 Algorithmic task learning
-
-### Development
-- 🧪 Testing ground for TRM improvements
-- 🎨 UI/UX design for ML demos
-- 📈 Model performance visualization
-- 🔍 Debugging and error analysis
-
-## 🚀 Future Enhancements
-
-### Model Improvements
-- [ ] Larger maze sizes (20×20, 30×30)
-- [ ] Additional puzzle types (8-puzzle, chess problems)
-- [ ] Dynamic recursive depth (adaptive T)
-- [ ] Ensemble models for improved accuracy
-- [ ] Transfer learning experiments
-
-### Demo Features
-- [ ] User-uploadable mazes/puzzles
-- [ ] Export animations as videos
-- [ ] Multi-language support
-- [ ] Dark/light theme toggle
-- [ ] Model performance graphs
-- [ ] Real-time fine-tuning interface
-
-### Research Directions
-- [ ] 3D maze navigation
-- [ ] Longer sequence reasoning tasks
-- [ ] Real-time online learning
-- [ ] Attention visualization
-- [ ] Scaling studies (parameters vs accuracy)
-
-## 🤝 Contributing
-
-Contributions are welcome! Areas for contribution:
-
-1. **Model Training**
-   - Experiment with hyperparameters
-   - Try different architectures
-   - Train on new tasks
-
-2. **Demo Enhancement**
-   - UI/UX improvements
-   - New visualization types
-   - Performance optimizations
-
-3. **Documentation**
-   - Code examples
-   - Tutorial notebooks
-   - Architecture explanations
-
-4. **Testing**
-   - Unit tests
-   - Integration tests
-   - Performance benchmarks
 
 ## 📝 Known Limitations
 
@@ -404,23 +337,4 @@ Contributions are welcome! Areas for contribution:
 
 MIT License - See LICENSE file for details
 
-## 🙏 Acknowledgments
 
-- **Research**: Based on the Tiny Recursive Model paper ([2510.04871v1.pdf](2510.04871v1.pdf))
-- **Inspiration**: Original demo.html design and visualization concepts
-- **Framework**: Built with PyTorch and Streamlit
-- **Community**: Open-source ML/AI community
-
-## 📞 Project Information
-
-- **Version**: 1.0 (Production Ready)
-- **Status**: ✅ Complete and Stable
-- **Last Updated**: January 6, 2026
-- **Maintenance**: Stable state, minimal updates needed
-
----
-
-<p align="center">
-  <b>Built with ❤️ using PyTorch and Streamlit</b><br>
-  <i>"Intelligence is not just knowing; it is the persistence of thinking."</i>
-</p>
