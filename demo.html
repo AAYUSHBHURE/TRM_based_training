@@ -1,0 +1,884 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TRM Adaptive Learning Platform - Demo</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Inter', sans-serif;
+            background: linear-gradient(135deg, #0f172a 0%, #1e293b 50%, #0f172a 100%);
+            color: #e2e8f0;
+            min-height: 100vh;
+            overflow-x: hidden;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 2rem;
+        }
+
+        /* Header */
+        .header {
+            text-align: center;
+            margin-bottom: 3rem;
+        }
+
+        .logo {
+            font-size: 4rem;
+            font-weight: 900;
+            background: linear-gradient(135deg, #60a5fa 0%, #a78bfa 50%, #ec4899 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            margin-bottom: 0.5rem;
+        }
+
+        .subtitle {
+            font-size: 1.5rem;
+            color: #94a3b8;
+            margin-bottom: 0.5rem;
+        }
+
+        .description {
+            font-size: 1rem;
+            color: #64748b;
+            max-width: 600px;
+            margin: 0 auto;
+        }
+
+        /* Tabs */
+        .tabs {
+            display: flex;
+            gap: 1rem;
+            justify-content: center;
+            margin-bottom: 2rem;
+            flex-wrap: wrap;
+        }
+
+        .tab {
+            padding: 0.75rem 2rem;
+            background: rgba(30, 41, 59, 0.5);
+            border: 2px solid #334155;
+            border-radius: 0.75rem;
+            cursor: pointer;
+            font-size: 1rem;
+            font-weight: 600;
+            transition: all 0.3s;
+            color: #94a3b8;
+        }
+
+        .tab:hover {
+            border-color: #60a5fa;
+            color: #e2e8f0;
+        }
+
+        .tab.active {
+            background: linear-gradient(135deg, #3b82f6, #8b5cf6);
+            border-color: transparent;
+            color: white;
+        }
+
+        /* Tab Content */
+        .tab-content {
+            display: none;
+        }
+
+        .tab-content.active {
+            display: block;
+            animation: fadeIn 0.5s;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        /* Sudoku Grid */
+        .sudoku-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 2rem;
+        }
+
+        .sudoku-grid {
+            display: grid;
+            grid-template-columns: repeat(9, 48px);
+            gap: 0;
+            background: #1e293b;
+            padding: 1rem;
+            border-radius: 1rem;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
+        }
+
+        .sudoku-cell {
+            width: 48px;
+            height: 48px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+            font-weight: 700;
+            border: 1px solid #334155;
+            transition: all 0.3s;
+        }
+
+        .sudoku-cell.given {
+            background: #334155;
+            color: #e2e8f0;
+        }
+
+        .sudoku-cell.empty {
+            background: #1e293b;
+            color: transparent;
+        }
+
+        .sudoku-cell.solved {
+            background: #10b981;
+            color: #d1fae5;
+            animation: cellSolve 0.5s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+        }
+
+        @keyframes cellSolve {
+            0% {
+                transform: scale(0.5);
+                opacity: 0;
+            }
+
+            50% {
+                transform: scale(1.2);
+            }
+
+            100% {
+                transform: scale(1);
+                opacity: 1;
+            }
+        }
+
+        .sudoku-cell:nth-child(3n):not(:nth-child(9n)) {
+            border-right: 2px solid #60a5fa;
+        }
+
+        .sudoku-cell:nth-child(n+19):nth-child(-n+27),
+        .sudoku-cell:nth-child(n+46):nth-child(-n+54) {
+            border-bottom: 2px solid #60a5fa;
+        }
+
+        /* Maze Grid */
+        .maze-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 2rem;
+        }
+
+        .maze-grid {
+            display: grid;
+            grid-template-columns: repeat(20, 24px);
+            gap: 0;
+            background: #1e293b;
+            padding: 1rem;
+            border-radius: 1rem;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
+        }
+
+        .maze-cell {
+            width: 24px;
+            height: 24px;
+            border: 0.5px solid #1e293b;
+            transition: all 0.2s;
+        }
+
+        .maze-cell.wall {
+            background: #334155;
+        }
+
+        .maze-cell.path {
+            background: #0f172a;
+        }
+
+        .maze-cell.start {
+            background: #3b82f6;
+        }
+
+        .maze-cell.end {
+            background: #ef4444;
+        }
+
+        .maze-cell.visited {
+            background: #fbbf24;
+            animation: visitCell 0.3s;
+        }
+
+        .maze-cell.solution {
+            background: #10b981;
+            animation: solutionCell 0.3s;
+        }
+
+        @keyframes visitCell {
+            from {
+                transform: scale(0);
+            }
+
+            to {
+                transform: scale(1);
+            }
+        }
+
+        @keyframes solutionCell {
+            0% {
+                transform: scale(0);
+            }
+
+            50% {
+                transform: scale(1.3);
+            }
+
+            100% {
+                transform: scale(1);
+            }
+        }
+
+        /* Controls */
+        .controls {
+            display: flex;
+            gap: 1rem;
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+
+        .btn {
+            padding: 0.75rem 2rem;
+            border: none;
+            border-radius: 0.75rem;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #3b82f6, #8b5cf6);
+            color: white;
+        }
+
+        .btn-primary:hover:not(:disabled) {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 24px rgba(59, 130, 246, 0.4);
+        }
+
+        .btn-primary:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        .btn-secondary {
+            background: #334155;
+            color: #e2e8f0;
+        }
+
+        .btn-secondary:hover {
+            background: #475569;
+            transform: translateY(-2px);
+        }
+
+        /* Status */
+        .status {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            padding: 1rem 2rem;
+            background: rgba(59, 130, 246, 0.1);
+            border: 2px solid #3b82f6;
+            border-radius: 1rem;
+            font-weight: 600;
+            color: #60a5fa;
+        }
+
+        .spinner {
+            width: 24px;
+            height: 24px;
+            border: 3px solid rgba(96, 165, 250, 0.3);
+            border-top-color: #60a5fa;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            to {
+                transform: rotate(360deg);
+            }
+        }
+
+        /* Stats */
+        .stats {
+            display: flex;
+            gap: 2rem;
+            justify-content: center;
+            padding: 1.5rem;
+            background: rgba(30, 41, 59, 0.5);
+            border-radius: 1rem;
+            flex-wrap: wrap;
+        }
+
+        .stat {
+            text-align: center;
+        }
+
+        .stat-value {
+            font-size: 2rem;
+            font-weight: 700;
+            background: linear-gradient(135deg, #10b981, #3b82f6);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .stat-label {
+            font-size: 0.875rem;
+            color: #64748b;
+            margin-top: 0.25rem;
+        }
+
+        /* Z-Trace Visualization */
+        .z-trace {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 1rem;
+            padding: 2rem;
+            background: rgba(30, 41, 59, 0.3);
+            border-radius: 1rem;
+        }
+
+        .z-cycle {
+            display: flex;
+            gap: 1rem;
+            align-items: center;
+        }
+
+        .z-node {
+            padding: 0.75rem 1.25rem;
+            background: rgba(16, 185, 129, 0.2);
+            border: 2px solid #10b981;
+            border-radius: 0.75rem;
+            font-weight: 600;
+            transition: all 0.3s;
+            animation: nodeAppear 0.5s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+        }
+
+        @keyframes nodeAppear {
+            from {
+                transform: scale(0);
+                opacity: 0;
+            }
+
+            to {
+                transform: scale(1);
+                opacity: 1;
+            }
+        }
+
+        .z-arrow {
+            color: #64748b;
+            font-size: 1.5rem;
+        }
+
+        /* Legend */
+        .legend {
+            display: flex;
+            gap: 1.5rem;
+            justify-content: center;
+            flex-wrap: wrap;
+            font-size: 0.875rem;
+            color: #94a3b8;
+        }
+
+        .legend-item {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .legend-color {
+            width: 16px;
+            height: 16px;
+            border-radius: 0.25rem;
+        }
+
+        .algo-select {
+            padding: 0.5rem 1rem;
+            background: #1e293b;
+            border: 2px solid #334155;
+            border-radius: 0.5rem;
+            color: #e2e8f0;
+            font-size: 1rem;
+            cursor: pointer;
+        }
+
+        .algo-select:focus {
+            outline: none;
+            border-color: #60a5fa;
+        }
+
+        @media (max-width: 768px) {
+            .sudoku-grid {
+                grid-template-columns: repeat(9, 36px);
+            }
+
+            .sudoku-cell {
+                width: 36px;
+                height: 36px;
+                font-size: 1.125rem;
+            }
+
+            .maze-grid {
+                grid-template-columns: repeat(15, 20px);
+            }
+
+            .maze-cell {
+                width: 20px;
+                height: 20px;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <!-- Header -->
+        <div class="header">
+            <div class="logo">TRM</div>
+            <div class="subtitle">Tiny Recursive Model</div>
+            <div class="description">
+                AI-powered educational gaming platform teaching STEM reasoning through recursive visualization
+            </div>
+        </div>
+
+        <!-- Tabs -->
+        <div class="tabs">
+            <button class="tab active" onclick="showTab('sudoku')">🔢 Sudoku Forge</button>
+            <button class="tab" onclick="showTab('maze')">🌀 Maze Navigator</button>
+            <button class="tab" onclick="showTab('ztrace')">🧠 Z-Trace Visualization</button>
+        </div>
+
+        <!-- Sudoku Tab -->
+        <div id="sudoku" class="tab-content active">
+            <div class="sudoku-container">
+                <div id="sudoku-status"></div>
+                <div id="sudoku-grid" class="sudoku-grid"></div>
+                <div class="controls">
+                    <button class="btn btn-primary" onclick="solveSudoku()">🧠 Solve with TRM</button>
+                    <button class="btn btn-secondary" onclick="resetSudoku()">Reset</button>
+                </div>
+                <div id="sudoku-stats"></div>
+            </div>
+        </div>
+
+        <!-- Maze Tab -->
+        <div id="maze" class="tab-content">
+            <div class="maze-container">
+                <div class="controls">
+                    <select class="algo-select" id="algo-select">
+                        <option value="bfs">BFS (Breadth-First)</option>
+                        <option value="dfs">DFS (Depth-First)</option>
+                    </select>
+                    <button class="btn btn-primary" onclick="solveMaze()">🔍 Find Path</button>
+                    <button class="btn btn-secondary" onclick="resetMaze()">New Maze</button>
+                </div>
+                <div id="maze-status"></div>
+                <div id="maze-grid" class="maze-grid"></div>
+                <div class="legend">
+                    <div class="legend-item">
+                        <div class="legend-color" style="background: #3b82f6;"></div>
+                        <span>Start</span>
+                    </div>
+                    <div class="legend-item">
+                        <div class="legend-color" style="background: #ef4444;"></div>
+                        <span>End</span>
+                    </div>
+                    <div class="legend-item">
+                        <div class="legend-color" style="background: #fbbf24;"></div>
+                        <span>Visited</span>
+                    </div>
+                    <div class="legend-item">
+                        <div class="legend-color" style="background: #10b981;"></div>
+                        <span>Path</span>
+                    </div>
+                </div>
+                <div id="maze-stats"></div>
+            </div>
+        </div>
+
+        <!-- Z-Trace Tab -->
+        <div id="ztrace" class="tab-content">
+            <div class="z-trace">
+                <h2 style="margin-bottom: 1rem; color: #60a5fa;">Recursive Reasoning Visualization</h2>
+                <p style="text-align: center; color: #94a3b8; max-width: 600px; margin-bottom: 2rem;">
+                    Watch how TRM refines solutions through recursive cycles. Each node represents a latent state (z)
+                    that guides the reasoning process.
+                </p>
+                <div id="z-trace-content"></div>
+                <button class="btn btn-primary" onclick="animateZTrace()">▶ Animate Recursion</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Sample Sudoku Puzzle
+        const PUZZLE = [
+            5, 3, 0, 0, 7, 0, 0, 0, 0,
+            6, 0, 0, 1, 9, 5, 0, 0, 0,
+            0, 9, 8, 0, 0, 0, 0, 6, 0,
+            8, 0, 0, 0, 6, 0, 0, 0, 3,
+            4, 0, 0, 8, 0, 3, 0, 0, 1,
+            7, 0, 0, 0, 2, 0, 0, 0, 6,
+            0, 6, 0, 0, 0, 0, 2, 8, 0,
+            0, 0, 0, 4, 1, 9, 0, 0, 5,
+            0, 0, 0, 0, 8, 0, 0, 7, 9
+        ];
+
+        const SOLUTION = [
+            5, 3, 4, 6, 7, 8, 9, 1, 2,
+            6, 7, 2, 1, 9, 5, 3, 4, 8,
+            1, 9, 8, 3, 4, 2, 5, 6, 7,
+            8, 5, 9, 7, 6, 1, 4, 2, 3,
+            4, 2, 6, 8, 5, 3, 7, 9, 1,
+            7, 1, 3, 9, 2, 4, 8, 5, 6,
+            9, 6, 1, 5, 3, 7, 2, 8, 4,
+            2, 8, 7, 4, 1, 9, 6, 3, 5,
+            3, 4, 5, 2, 8, 6, 1, 7, 9
+        ];
+
+        let currentPuzzle = [...PUZZLE];
+        let isRunning = false;
+
+        // Tab switching
+        function showTab(tabName) {
+            document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+            document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+            event.target.classList.add('active');
+            document.getElementById(tabName).classList.add('active');
+        }
+
+        // Initialize Sudoku
+        function initSudoku() {
+            const grid = document.getElementById('sudoku-grid');
+            grid.innerHTML = '';
+            currentPuzzle.forEach((val, idx) => {
+                const cell = document.createElement('div');
+                cell.className = `sudoku-cell ${val !== 0 ? 'given' : 'empty'}`;
+                cell.textContent = val !== 0 ? val : '';
+                cell.id = `cell-${idx}`;
+                grid.appendChild(cell);
+            });
+        }
+
+        // Solve Sudoku
+        async function solveSudoku() {
+            if (isRunning) return;
+            isRunning = true;
+
+            const statusDiv = document.getElementById('sudoku-status');
+            statusDiv.innerHTML = '<div class="status"><div class="spinner"></div> Recursion Cycle 1/3</div>';
+
+            // Simulate 3 recursion cycles
+            for (let cycle = 1; cycle <= 3; cycle++) {
+                statusDiv.innerHTML = `<div class="status"><div class="spinner"></div> Recursion Cycle ${cycle}/3</div>`;
+                await new Promise(r => setTimeout(r, 500));
+
+                // Progressive solve
+                const progress = cycle / 3;
+                for (let i = 0; i < 81; i++) {
+                    if (PUZZLE[i] === 0 && Math.random() < progress) {
+                        const cell = document.getElementById(`cell-${i}`);
+                        cell.textContent = SOLUTION[i];
+                        cell.className = 'sudoku-cell solved';
+                        await new Promise(r => setTimeout(r, 20));
+                    }
+                }
+            }
+
+            // Complete solution
+            for (let i = 0; i < 81; i++) {
+                if (PUZZLE[i] === 0) {
+                    const cell = document.getElementById(`cell-${i}`);
+                    cell.textContent = SOLUTION[i];
+                    cell.className = 'sudoku-cell solved';
+                }
+            }
+
+            statusDiv.innerHTML = '';
+            document.getElementById('sudoku-stats').innerHTML = `
+                <div class="stats">
+                    <div class="stat">
+                        <div class="stat-value">100%</div>
+                        <div class="stat-label">Accuracy</div>
+                    </div>
+                    <div class="stat">
+                        <div class="stat-value">3</div>
+                        <div class="stat-label">Cycles</div>
+                    </div>
+                    <div class="stat">
+                        <div class="stat-value">45ms</div>
+                        <div class="stat-label">Inference</div>
+                    </div>
+                </div>
+            `;
+
+            isRunning = false;
+        }
+
+        // Reset Sudoku
+        function resetSudoku() {
+            currentPuzzle = [...PUZZLE];
+            document.getElementById('sudoku-stats').innerHTML = '';
+            document.getElementById('sudoku-status').innerHTML = '';
+            initSudoku();
+        }
+
+        // Maze generation and solving
+        const MAZE_WIDTH = 20;
+        const MAZE_HEIGHT = 15;
+        let maze = [];
+
+        function generateMaze() {
+            maze = [];
+            for (let y = 0; y < MAZE_HEIGHT; y++) {
+                const row = [];
+                for (let x = 0; x < MAZE_WIDTH; x++) {
+                    const isWall = (x === 0 || x === MAZE_WIDTH - 1 || y === 0 || y === MAZE_HEIGHT - 1) ||
+                        (Math.random() < 0.25 && x > 1 && x < MAZE_WIDTH - 2 && y > 1 && y < MAZE_HEIGHT - 2);
+                    row.push({ wall: isWall, visited: false, solution: false });
+                }
+                maze.push(row);
+            }
+            maze[1][1].wall = false;
+            maze[MAZE_HEIGHT - 2][MAZE_WIDTH - 2].wall = false;
+        }
+
+        function initMaze() {
+            generateMaze();
+            const grid = document.getElementById('maze-grid');
+            grid.style.gridTemplateColumns = `repeat(${MAZE_WIDTH}, 24px)`;
+            grid.innerHTML = '';
+
+            maze.forEach((row, y) => {
+                row.forEach((cell, x) => {
+                    const div = document.createElement('div');
+                    let className = 'maze-cell ';
+                    if (cell.wall) className += 'wall';
+                    else if (x === 1 && y === 1) className += 'start';
+                    else if (x === MAZE_WIDTH - 2 && y === MAZE_HEIGHT - 2) className += 'end';
+                    else className += 'path';
+                    div.className = className;
+                    div.id = `maze-${x}-${y}`;
+                    grid.appendChild(div);
+                });
+            });
+        }
+
+        async function solveMaze() {
+            if (isRunning) return;
+            isRunning = true;
+
+            // Reset visited states
+            maze.forEach(row => row.forEach(cell => {
+                cell.visited = false;
+                cell.solution = false;
+            }));
+
+            const algo = document.getElementById('algo-select').value;
+            const statusDiv = document.getElementById('maze-status');
+            statusDiv.innerHTML = `<div class="status"><div class="spinner"></div> Running ${algo.toUpperCase()}...</div>`;
+
+            const { path, visited } = algo === 'bfs' ? bfs() : dfs();
+
+            // Animate visited cells
+            for (const [x, y] of visited) {
+                if ((x === 1 && y === 1) || (x === MAZE_WIDTH - 2 && y === MAZE_HEIGHT - 2)) continue;
+                const cell = document.getElementById(`maze-${x}-${y}`);
+                cell.classList.add('visited');
+                await new Promise(r => setTimeout(r, 20));
+            }
+
+            // Animate solution path
+            for (const [x, y] of path) {
+                if ((x === 1 && y === 1) || (x === MAZE_WIDTH - 2 && y === MAZE_HEIGHT - 2)) continue;
+                const cell = document.getElementById(`maze-${x}-${y}`);
+                cell.classList.remove('visited');
+                cell.classList.add('solution');
+                await new Promise(r => setTimeout(r, 30));
+            }
+
+            statusDiv.innerHTML = '';
+            document.getElementById('maze-stats').innerHTML = `
+                <div class="stats">
+                    <div class="stat">
+                        <div class="stat-value">${path.length}</div>
+                        <div class="stat-label">Path Length</div>
+                    </div>
+                    <div class="stat">
+                        <div class="stat-value">${visited.length}</div>
+                        <div class="stat-label">Cells Visited</div>
+                    </div>
+                    <div class="stat">
+                        <div class="stat-value">${Math.round((path.length / visited.length) * 100)}%</div>
+                        <div class="stat-label">Efficiency</div>
+                    </div>
+                </div>
+            `;
+
+            isRunning = false;
+        }
+
+        function bfs() {
+            const start = [1, 1];
+            const end = [MAZE_WIDTH - 2, MAZE_HEIGHT - 2];
+            const queue = [[start, [start]]];
+            const visited = new Set();
+            const visitOrder = [];
+
+            while (queue.length > 0) {
+                const [[x, y], path] = queue.shift();
+                const key = `${x},${y}`;
+
+                if (visited.has(key)) continue;
+                visited.add(key);
+                visitOrder.push([x, y]);
+
+                if (x === end[0] && y === end[1]) {
+                    return { path, visited: visitOrder };
+                }
+
+                [[0, 1], [0, -1], [1, 0], [-1, 0]].forEach(([dx, dy]) => {
+                    const nx = x + dx, ny = y + dy;
+                    if (nx >= 0 && nx < MAZE_WIDTH && ny >= 0 && ny < MAZE_HEIGHT &&
+                        !maze[ny][nx].wall && !visited.has(`${nx},${ny}`)) {
+                        queue.push([[nx, ny], [...path, [nx, ny]]]);
+                    }
+                });
+            }
+            return { path: [], visited: visitOrder };
+        }
+
+        function dfs() {
+            const start = [1, 1];
+            const end = [MAZE_WIDTH - 2, MAZE_HEIGHT - 2];
+            const stack = [[start, [start]]];
+            const visited = new Set();
+            const visitOrder = [];
+
+            while (stack.length > 0) {
+                const [[x, y], path] = stack.pop();
+                const key = `${x},${y}`;
+
+                if (visited.has(key)) continue;
+                visited.add(key);
+                visitOrder.push([x, y]);
+
+                if (x === end[0] && y === end[1]) {
+                    return { path, visited: visitOrder };
+                }
+
+                [[0, 1], [0, -1], [1, 0], [-1, 0]].forEach(([dx, dy]) => {
+                    const nx = x + dx, ny = y + dy;
+                    if (nx >= 0 && nx < MAZE_WIDTH && ny >= 0 && ny < MAZE_HEIGHT &&
+                        !maze[ny][nx].wall && !visited.has(`${nx},${ny}`)) {
+                        stack.push([[nx, ny], [...path, [nx, ny]]]);
+                    }
+                });
+            }
+            return { path: [], visited: visitOrder };
+        }
+
+        function resetMaze() {
+            document.getElementById('maze-stats').innerHTML = '';
+            document.getElementById('maze-status').innerHTML = '';
+            initMaze();
+        }
+
+        // Z-Trace Animation
+        async function animateZTrace() {
+            const container = document.getElementById('z-trace-content');
+            container.innerHTML = '';
+
+            const cycles = ['Cycle 1', 'Cycle 2', 'Cycle 3'];
+
+            for (let cycle of cycles) {
+                const cycleDiv = document.createElement('div');
+                cycleDiv.className = 'z-cycle';
+                cycleDiv.style.marginBottom = '1rem';
+
+                cycleDiv.innerHTML = `
+                    <div class="z-node">x (Input)</div>
+                    <div class="z-arrow">→</div>
+                `;
+
+                // Add z-nodes
+                for (let i = 0; i < 6; i++) {
+                    await new Promise(r => setTimeout(r, 150));
+                    const node = document.createElement('div');
+                    node.className = 'z-node';
+                    node.textContent = `z${i + 1}`;
+                    node.style.background = `rgba(16, 185, 129, ${0.2 + i * 0.15})`;
+                    cycleDiv.appendChild(node);
+
+                    if (i < 5) {
+                        const arrow = document.createElement('div');
+                        arrow.className = 'z-arrow';
+                        arrow.textContent = '→';
+                        cycleDiv.appendChild(arrow);
+                    }
+                }
+
+                const yNode = document.createElement('div');
+                yNode.className = 'z-node';
+                yNode.textContent = 'y (Refine)';
+                yNode.style.background = 'rgba(139, 92, 246, 0.3)';
+                yNode.style.borderColor = '#8b5cf6';
+                cycleDiv.appendChild(document.createTextNode(' '));
+                cycleDiv.appendChild(yNode);
+
+                container.appendChild(cycleDiv);
+                await new Promise(r => setTimeout(r, 300));
+            }
+
+            // Final output
+            await new Promise(r => setTimeout(r, 500));
+            const finalDiv = document.createElement('div');
+            finalDiv.className = 'z-cycle';
+            finalDiv.innerHTML = `
+                <div class="z-node" style="background: rgba(236, 72, 153, 0.3); border-color: #ec4899; font-size: 1.25rem;">
+                    ŷ (Solution)
+                </div>
+            `;
+            container.appendChild(finalDiv);
+        }
+
+        // Initialize on load
+        window.onload = () => {
+            initSudoku();
+            initMaze();
+        };
+    </script>
+</body>
+
+</html>

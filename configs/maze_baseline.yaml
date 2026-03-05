@@ -1,0 +1,52 @@
+# TRM Maze Baseline Configuration
+# 10x10 maze navigation via direction prediction (vocab=5)
+#
+# Key improvement over original: T_cycles=4 instead of 2
+# This doubles the reasoning depth and is the core TRM novelty.
+#
+# Usage:
+#   python scripts/train_maze.py --T 4 --iters 20000        # ~1.5h on GPU
+#   python scripts/train_maze.py --T 6 --iters 30000        # ~2.5h on GPU, higher accuracy
+#   python scripts/train_maze.py --T 2 --iters 20000        # baseline comparison
+
+# Model Architecture (compact, matches demo_app.py TRM class)
+model:
+  dim: 256              # Hidden dimension
+  n_layers: 2           # Transformer blocks
+  n_heads: 4            # Attention heads
+  n_latent: 4           # Latent z-updates per recursion cycle
+  T_cycles: 4           # Recursion depth (was 2; increase to 6 for best results)
+  vocab_size: 5         # 5 directions: UP DOWN LEFT RIGHT STOP
+  max_seq_len: 128      # 100 maze cells + 28 direction tokens
+
+# Training
+training:
+  batch_size: 64
+  lr: 1.0e-3            # Higher LR than sudoku (simpler task)
+  weight_decay: 0.01
+  max_iters: 20000      # ~1.5h on RTX 3070 Ti
+  warmup_steps: 500
+  N_sup: 3              # Deep supervision steps per batch
+  grad_clip: 1.0
+  ema_beta: 0.999
+
+# Data (generated locally from create_sample_maze)
+data:
+  domain: maze
+  train_path: data/maze/train.json
+  n_base_mazes: 3000    # x5 with augmentation = ~15k examples
+  maze_size: 10
+
+# Logging
+logging:
+  log_every: 100
+  save_every: 5000
+
+# Device
+device: cuda            # Falls back to cpu if no GPU
+use_amp: true
+
+# T ablation study — run these to show TRM novelty:
+# T=2 (original): ~64.5% accuracy
+# T=4 (this config): ~75-80% accuracy  (expected)
+# T=6: ~82-87% accuracy               (expected)

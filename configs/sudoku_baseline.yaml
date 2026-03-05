@@ -1,0 +1,43 @@
+# TRM Sudoku Baseline Configuration
+# Target: 87% accuracy on Sudoku-Extreme with ~5M params
+
+# Model Architecture
+model:
+  dim: 512 # Hidden dimension
+  n_layers: 2 # Transformer layers (kept small for efficiency)
+  n_heads: 8 # Attention heads
+  n_latent: 6 # Latent z-updates per cycle
+  T_cycles: 3 # Recursion cycles (T-1 no-grad + 1 grad)
+  vocab_size: 10 # 0-9 for Sudoku
+  max_seq_len: 128 # 81 cells + padding
+  dropout: 0.0 # No dropout for puzzle tasks
+
+# Training (Optimized for RTX 3070 Ti - 8GB VRAM)
+training:
+  batch_size: 24 # Safe for 8GB VRAM with AMP
+  lr: 1.0e-4 # AdamW learning rate
+  weight_decay: 0.01 # L2 regularization
+  max_iters: 50000 # Training iterations (~2 hours)
+  N_sup: 16 # Max deep supervision steps
+  halt_threshold: 0.5 # ACT halting confidence
+  ema_beta: 0.999 # EMA decay for stable generalization
+  grad_clip: 1.0 # Gradient clipping for stability
+
+# Data
+data:
+  domain: sudoku
+  train_path: data/sudoku/train.json
+  val_split: 0.1 # 10% for validation
+  include_constraints: true
+
+# Logging
+logging:
+  log_interval: 100
+  save_interval: 1000
+  val_interval: 500
+  use_wandb: false
+  wandb_project: trm-sudoku
+
+# Device
+device: cuda # Use 'cpu' if no GPU
+use_amp: true # Mixed precision (A100/4090 recommended)

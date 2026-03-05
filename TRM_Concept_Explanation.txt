@@ -1,0 +1,87 @@
+TRM: Tiny Recursive Model - Technical Deep Dive & Architectural Analysis
+========================================================================
+
+1. INTRODUCTION & THEORETICAL FOUNDATION
+-----------------------------------------
+The Tiny Recursive Model (TRM) represents a paradigm shift from "Depth via Capacity" to "Depth via Time." Standard Large Language Models (LLMs) rely on massive parameter counts and fixed-depth execution stacks to model complex dependencies. TRM, conversely, leverages *algorithmic recurrence*: it reuses a compact set of parameters iteratively to refine a latent state representation of the problem.
+
+This approach is grounded in the hypothesis of "Iterative Refinement" or "System 2 Thinking"—the idea that complex reasoning is a function of compute steps (time) applied to a problem, not just the static capacity of the network.
+
+2. MATHEMATICAL FORMULATION
+---------------------------
+To understand TRM rigor, we contrast it formally with Standard Transformers.
+
+A. Standard Transformer (Fixed Depth N)
+   Let $x$ be the input embedding. The output $y$ is computed as:
+   $z_0 = E(x)$
+   $z_k = \text{Layer}_k(z_{k-1}) \quad \forall k \in [1, N]$
+   $y = \text{Proj}(z_N)$
+   *Parameters*: $\theta = \sum_{k=1}^N |\text{Layer}_k|$ (Parameters grow linearly with depth).
+
+B. TRM (Recursive Depth T)
+   The core innovation is sharing weights $\theta_R$ across all time steps $t$.
+   $z_0 = E(x)$
+   $z_t = \text{RecursiveBlock}(z_{t-1}, x; \theta_R) \quad \forall t \in [1, T]$
+   $y_t = \text{Proj}(z_t)$
+   *Parameters*: $\theta = |\text{RecursiveBlock}|$ (Parameters are constant, independent of depth).
+
+   This recurrence relation $z_t = f(z_{t-1})$ makes TRM effectively a Recurrent Neural Network (RNN) but with a highly expressive transition function (Self-Attention + MLP) and a stable optimization landscape provided by residual connections.
+
+3. ARCHITECTURAL MECHANISMS
+---------------------------
+The TRM architecture consists of three distinct phases:
+
+   [INPUT EMBEDDING] --> [RECURSIVE REASONING LOOP] --> [OUTPUT PROJECTION]
+
+   A. Information Injection
+   Unlike standard RNNs which often consume input only at $t=0$, TRM can optionally inject the original positional information or problem statement variables at *every* step of the recursion. This prevents "catastrophic forgetting" of the premise as the model "thinks."
+
+   B. The Recursive Block (The "Brain")
+   This single block is repeated $T$ times. It typically contains:
+   1. **RMSNorm / LayerNorm**: Stabilizes hidden state distribution.
+   2. **Multi-Head Self-Attention (MHSA)**: Allows the model to look at different parts of the problem state simultaneously. In Sudoku, this lets strictly distant cells communicate constraints.
+   3. **Feed-Forward Network (FFN/MLP)**: Processes the information gathered by attention to update the state of each token/cell.
+   4. **Residual Update**: $z_{new} = z_{old} + \text{Block}(z_{old})$. This fundamental property (ResNet style) implies the model learns *refinements* ($\Delta z$) rather than transformations, making training significantly more stable for large $T$.
+
+4. TRAINING DYNAMICS & CHALLENGES
+---------------------------------
+Training a recursive model is notoriously difficult due to the "Exploding/Vanishing Gradient" problem inherent in unrolled computation graphs.
+
+   - **Backpropagation Through Time (BPTT)**: Gradients must flow back through all $T$ steps. If the spectral radius of the recursive weight matrix deviates from 1, gradients become unstable.
+   - **Solution - Deep Supervision (Intermediate Loss)**: We compute loss not just at $z_T$, but at multiple intermediate steps (e.g., $L_{total} = \sum_{t=1}^T \gamma^{T-t} L(y_t)$). This forces the model to learn a valid "trajectory" to the solution, where every step effectively improves the state.
+   - **Stochastic Depth (Optional)**: During inference, $T$ can be dynamic. Step until stable? Train with varying $T$ to enforce robustness.
+
+5. TASK-SPECIFIC ANALYSIS
+-------------------------
+
+   A. Sudoku (Constraint Propagation)
+   - **State Space**: 9x9 grid, 81 tokens. Embedding dimension $D$.
+   - **Mechanism**: The recursive steps simulate the algorithm of "Constraint Propagation."
+     - *Cycle 1*: "Cell (1,1) cannot be 5 because (1,9) is 5."
+     - *Cycle 2*: "Since (1,1) is not 5, and (2,2) cannot be 3..."
+   - **Why TRM Wins**: A standard shallow model sees only immediate relationships. A deep model sees transitive relationships. TRM mimics an infinite-depth model by re-applying the same logic rules (the "physics" of Sudoku) repeatedly.
+
+   B. Maze Solving (Path Integration)
+   - **State Space**: Grid tokens (Walls, Empty, Start, End).
+   - **Mechanism**: Pathfinding is a wave-propagation problem (e.g., BFS/A*).
+     - *Cycle t*: Information propagates from "Start" one step further.
+   - **Recursive Intuition**: Each pass allows the "potential field" of the correct path to expand by one hop. $T$ iterations allow the model to solve paths of length $T$.
+
+6. IMPLICATIONS FOR AI EFFICIENCY
+---------------------------------
+   - **Parameter Efficiency**: We achieve logic performance comparable to models 100x larger.
+   - **Memory Footprint**: The model weights fit in L1/L2 cache of modern CPUs/GPUs, minimizing memory bandwidth bottlenecks.
+   - **Variable Compute**: Harder problems? Run the loop more times. Easier problem? Early exit. This is impossible in standard fixed-depth Transformers.
+
+7. THE SINGLE NETWORK HYPOTHESIS
+--------------------------------
+   TRM demonstrates that separate networks for "low-level reasoning" (fL) and "high-level solution" (fH) are unnecessary. A single network can perform both roles:
+   
+   - **z-update**: `z = net(x, y, z)` (Includes x: Conditioning on problem statement)
+   - **y-update**: `y = net(y, z)`    (Excludes x: Refinement based on latent state)
+   
+   The presence or absence of the input conditioning `x` implicitly signals the network to switch between "reasoning mode" and "solutioning mode". This halves the parameter count vs Hierarchical Recurrent Models (HRM) while improving generalization.
+
+
+------------------------------------------------------------------------
+"Intelligence is not just knowing; it is the persistence of thinking."

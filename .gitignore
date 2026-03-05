@@ -1,0 +1,64 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+env/
+venv/
+*.egg-info/
+dist/
+build/
+
+# Model checkpoints (LARGE FILES - don't push!)
+outputs/*.pt
+*.pth
+*.ckpt
+final.pt
+
+# Training data (LARGE FILES)
+data/sudoku/*.json
+data/mazes/*.json
+*.csv
+*.parquet
+
+# Notebooks folder (excluded from repo)
+notebooks/
+
+# Jupyter
+.ipynb_checkpoints
+*.ipynb_checkpoints
+
+# Virtual env
+.venv/
+
+# Environment
+.env
+.env.local
+kaggle.json
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Logs
+*.log
+wandb/
+
+# Node (for web app)
+web/node_modules/
+web/.next/
+web/out/
+web/.vercel
+
+# Temporary
+*.tmp
+*.temp
+temp/
+tmp/
