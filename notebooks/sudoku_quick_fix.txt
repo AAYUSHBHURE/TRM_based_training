@@ -1,0 +1,41 @@
+# ============================================================
+# QUICK FIX for train_colab_corrected.ipynb
+# Replace lines 642-643 in the training loop
+# ============================================================
+
+# WRONG (lines 642-643):
+# x = ema_embedding(x_tokens)  # ❌ ema_embedding is not callable!
+# y = ema_embedding(batch["y_init_tokens"].to(device))
+
+# CORRECT:
+x = embedding(x_tokens)  # ✓ Use original embedding after apply_shadow()
+y = embedding(batch["y_init_tokens"].to(device))
+
+# ============================================================
+# ALSO: Speed up training by changing CONFIG
+# ============================================================
+
+# Replace lines 407-432 with:
+CONFIG = {
+    "dim": 512,
+    "n_layers": 2,
+    "n_heads": 8,
+    "n_latent": 6,
+    "T_cycles": 3,
+    "vocab_size": 10,
+    "max_seq_len": 128,
+    "dropout": 0.1,
+    "lr": 3e-4,
+    "weight_decay": 0.01,
+    "max_iters": 10000,      # ⚡ REDUCED from 20000
+    "batch_size": 32,
+    "warmup_steps": 500,      # ⚡ REDUCED from 1000
+    "grad_clip": 1.0,
+    "N_sup": 4,               # ⚡ REDUCED from 16 (4x faster!)
+    "ema_decay": 0.999,
+    "save_every": 2000,
+    "log_every": 100,
+}
+
+print("OPTIMIZED: N_sup=4, iters=10000 (~1 hour training)")
+print("Expected accuracy: 60-70%")

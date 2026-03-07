@@ -19,6 +19,9 @@ export default function MazePage() {
                         <Link href="/maze" className="text-green-400 font-medium">
                             Maze
                         </Link>
+                        <Link href="/2048" className="text-gray-400 hover:text-white transition-colors">
+                            2048
+                        </Link>
                     </div>
                 </div>
             </nav>

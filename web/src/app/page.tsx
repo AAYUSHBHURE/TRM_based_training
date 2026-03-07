@@ -21,7 +21,7 @@ export default function Home() {
         </div>
 
         {/* Game Cards */}
-        <div className="grid md:grid-cols-3 gap-8 max-w-5xl mx-auto">
+        <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-8 max-w-6xl mx-auto">
           {/* Sudoku Forge */}
           <Link href="/sudoku" className="group">
             <div className="relative p-6 bg-gray-800/50 backdrop-blur rounded-2xl border border-gray-700 hover:border-blue-500 transition-all duration-300 hover:-translate-y-2 hover:shadow-xl hover:shadow-blue-500/20">
@@ -59,6 +59,28 @@ export default function Home() {
                 Visualize DFS/BFS with adaptive dead-ends that teach decomposition.
               </p>
               <div className="mt-4 flex items-center text-green-400 text-sm font-medium">
+                Play Now
+                <svg className="w-4 h-4 ml-2 group-hover:translate-x-2 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                </svg>
+              </div>
+            </div>
+          </Link>
+
+          {/* 2048 Challenge */}
+          <Link href="/2048" className="group">
+            <div className="relative p-6 bg-gray-800/50 backdrop-blur rounded-2xl border border-gray-700 hover:border-orange-500 transition-all duration-300 hover:-translate-y-2 hover:shadow-xl hover:shadow-orange-500/20">
+              <div className="text-5xl mb-4">🎮</div>
+              <h3 className="text-2xl font-bold text-white mb-2 group-hover:text-orange-400 transition-colors">
+                2048 Challenge
+              </h3>
+              <p className="text-gray-400 mb-4">
+                Strategy • Ages 10+
+              </p>
+              <p className="text-sm text-gray-500">
+                Play manually or watch TRM use greedy heuristics to reach the 2048 tile.
+              </p>
+              <div className="mt-4 flex items-center text-orange-400 text-sm font-medium">
                 Play Now
                 <svg className="w-4 h-4 ml-2 group-hover:translate-x-2 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />

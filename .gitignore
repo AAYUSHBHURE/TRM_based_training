@@ -22,12 +22,9 @@ data/mazes/*.json
 *.csv
 *.parquet
 
-# Notebooks folder (excluded from repo)
-notebooks/
-
-# Jupyter
-.ipynb_checkpoints
-*.ipynb_checkpoints
+# Jupyter checkpoints only (notebooks ARE tracked)
+.ipynb_checkpoints/
+**/.ipynb_checkpoints/
 
 # Virtual env
 .venv/

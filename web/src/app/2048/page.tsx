@@ -1,7 +1,7 @@
-import SudokuForge from "@/components/SudokuForge";
+import Game2048 from "@/components/Game2048";
 import Link from "next/link";
 
-export default function SudokuPage() {
+export default function Game2048Page() {
     return (
         <main className="min-h-screen bg-gradient-to-br from-gray-900 via-gray-800 to-gray-900">
             {/* Navigation */}
@@ -13,13 +13,13 @@ export default function SudokuPage() {
                         </span>
                     </Link>
                     <div className="flex items-center gap-6">
-                        <Link href="/sudoku" className="text-blue-400 font-medium">
+                        <Link href="/sudoku" className="text-gray-400 hover:text-white transition-colors">
                             Sudoku
                         </Link>
                         <Link href="/maze" className="text-gray-400 hover:text-white transition-colors">
                             Maze
                         </Link>
-                        <Link href="/2048" className="text-gray-400 hover:text-white transition-colors">
+                        <Link href="/2048" className="text-orange-400 font-medium">
                             2048
                         </Link>
                     </div>
@@ -28,7 +28,7 @@ export default function SudokuPage() {
 
             {/* Content */}
             <div className="container mx-auto py-8">
-                <SudokuForge />
+                <Game2048 />
             </div>
         </main>
     );
